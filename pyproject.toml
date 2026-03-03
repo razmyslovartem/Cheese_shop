@@ -9,6 +9,15 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.13"
 
+[tool.poetry.group.lint.dependencies]
+black = ">=25.11.0,<26.0.0"
+mypy = ">=1.19.0,<2.0.0"
+flake8 = ">=7.3.0,<8.0.0"
+isort = ">=7.0.0,<8.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=9.0.2,<10.0.0"
+pytest-cov = ">=7.0.0,<8.0.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -67,17 +76,6 @@ extend-exclude = '''
   | \.pytest_cache
 )/
 '''
-[dependency-groups]
-lint = [
-    "black (>=25.11.0,<26.0.0)",
-    "mypy (>=1.19.0,<2.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)",
-    "isort (>=7.0.0,<8.0.0)"
-]
-dev = [
-    "pytest (>=9.0.2,<10.0.0)",
-    "pytest-cov (>=7.0.0,<8.0.0)"
-]
 
 [tool.coverage.report]
 exclude_also = [
@@ -91,4 +89,4 @@ exclude_also = [
     "if TYPE_CHECKING:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
-    ]
+]
