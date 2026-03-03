@@ -1,7 +1,7 @@
 from typing import List
 
-from main import Category
-from main import Product
+from src.category import Category
+from src.category import Product
 import pytest
 
 
