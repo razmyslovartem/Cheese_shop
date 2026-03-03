@@ -1,33 +1,21 @@
+from main import Category
+from main import Product
 import pytest
-
-from main import Product, Category
 
 
 @pytest.fixture()
 def sample_product_1():  # переименовали
-    return Product(
-        "Iphone 17 Pro",
-        "1TB, Cosmic Orange",
-        189000.0,
-        3)
+    return Product("Iphone 17 Pro", "1TB, Cosmic Orange", 189000.0, 3)
 
 
 @pytest.fixture()
 def sample_product_2():  # добавили второй продукт
-    return Product(
-        "Samsung Galaxy S25",
-        "512GB, Phantom Black",
-        150000.0,
-        5)
+    return Product("Samsung Galaxy S25", "512GB, Phantom Black", 150000.0, 5)
 
 
 @pytest.fixture()
 def sample_product_3():  # ДОБАВЛЯЕМ НЕДОСТАЮЩУЮ ФИКСТУРУ
-    return Product(
-        "Xiaomi Mi 14",
-        "256GB, Green",
-        50000.0,
-        10)
+    return Product("Xiaomi Mi 14", "256GB, Green", 50000.0, 10)
 
 
 def test_init_product(sample_product_1, sample_product_2, sample_product_3):
@@ -45,13 +33,10 @@ def test_init_product(sample_product_1, sample_product_2, sample_product_3):
     assert sample_product_3.price == 50000.0
     assert sample_product_3.quantity == 10
 
+
 @pytest.fixture()
 def sample_category(sample_product_1, sample_product_2):
-    return Category(
-        "Тестовая категория товаров",
-        "Тестовое описание товаров",
-        [sample_product_1, sample_product_2]
-    )
+    return Category("Тестовая категория товаров", "Тестовое описание товаров", [sample_product_1, sample_product_2])
 
 
 def test_init_category(sample_category, sample_product_1, sample_product_2):
@@ -86,11 +71,7 @@ def test_product_count(sample_product_1, sample_product_2, sample_product_3):
     Category.category_count = 0
     Category.product_count = 0
 
-    category1 = Category(
-        "Категория с товарами",
-        "Описание",
-        [sample_product_1, sample_product_2]
-    )
+    category1 = Category("Категория с товарами", "Описание", [sample_product_1, sample_product_2])
     assert Category.product_count == 2
     assert len(category1.products) == 2
     assert category1.products[0] == sample_product_1
@@ -98,11 +79,7 @@ def test_product_count(sample_product_1, sample_product_2, sample_product_3):
     assert category1.product_count == 2
 
     # Создаем категорию с 1 товаром
-    category2 = Category(
-        "Еще категория",
-        "Описание",
-        [sample_product_3]
-    )
+    category2 = Category("Еще категория", "Описание", [sample_product_3])
     assert Category.product_count == 3  # 2 + 1 = 3
     assert len(category2.products) == 1
     assert category2.products[0] == sample_product_3

@@ -1,5 +1,6 @@
 class Product:
     """Класс для товаров"""
+
     def __init__(self, name: str, description: str, price: float, quantity: int):
         self.name = name
         self.description = description
@@ -9,6 +10,7 @@ class Product:
 
 class Category:
     """Класс для категорий товаров"""
+
     category_count = 0  # счетчик категорий
     product_count = 0  # счетчик товаров
 
@@ -41,9 +43,11 @@ if __name__ == "__main__":
     # print(product3.price)
     # print(product3.quantity)
 
-    category1 = Category("Смартфоны",
-                         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-                         [product1, product2, product3])
+    category1 = Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        [product1, product2, product3],
+    )
 
     # print(category1.name == "Смартфоны")
     # print(category1.description)
@@ -51,10 +55,12 @@ if __name__ == "__main__":
     # print(category1.category_count)
     # print(category1.product_count)
 
-    product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
-    category2 = Category("Телевизоры",
-                         "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
-                         [product4])
+    product4 = Product('55" QLED 4K', "Фоновая подсветка", 123000.0, 7)
+    category2 = Category(
+        "Телевизоры",
+        "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
+        [product4],
+    )
 
     # print(category2.name)
     # print(category2.description)
