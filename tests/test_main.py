@@ -1,24 +1,26 @@
+from typing import List
+
 from main import Category
 from main import Product
 import pytest
 
 
 @pytest.fixture()
-def sample_product_1():  # переименовали
+def sample_product_1() -> Product:  # переименовали
     return Product("Iphone 17 Pro", "1TB, Cosmic Orange", 189000.0, 3)
 
 
 @pytest.fixture()
-def sample_product_2():  # добавили второй продукт
+def sample_product_2() -> Product:  # добавили второй продукт
     return Product("Samsung Galaxy S25", "512GB, Phantom Black", 150000.0, 5)
 
 
 @pytest.fixture()
-def sample_product_3():  # ДОБАВЛЯЕМ НЕДОСТАЮЩУЮ ФИКСТУРУ
+def sample_product_3() -> Product:  # ДОБАВЛЯЕМ НЕДОСТАЮЩУЮ ФИКСТУРУ
     return Product("Xiaomi Mi 14", "256GB, Green", 50000.0, 10)
 
 
-def test_init_product(sample_product_1, sample_product_2, sample_product_3):
+def test_init_product(sample_product_1: Product, sample_product_2: Product, sample_product_3: Product) -> None:
     """Тест на корректность инициализации объектов класса Product"""
     assert sample_product_1.name == "Iphone 17 Pro"
     assert sample_product_1.description == "1TB, Cosmic Orange"
@@ -35,11 +37,18 @@ def test_init_product(sample_product_1, sample_product_2, sample_product_3):
 
 
 @pytest.fixture()
-def sample_category(sample_product_1, sample_product_2):
+def sample_category(sample_product_1: Product, sample_product_2: Product) -> Category:
     return Category("Тестовая категория товаров", "Тестовое описание товаров", [sample_product_1, sample_product_2])
 
 
-def test_init_category(sample_category, sample_product_1, sample_product_2):
+def test_category_products_list(sample_category: Category) -> None:
+    """Тест с использованием List в аннотации"""
+    products_list: List[Product] = sample_category.products  # ⬅ ЗДЕСЬ ИСПОЛЬЗУЕТСЯ List
+    assert len(products_list) == 2
+    assert products_list[0].name == "Iphone 17 Pro"
+
+
+def test_init_category(sample_category: Category, sample_product_1: Product, sample_product_2: Product) -> None:
     """Тест на корректность инициализации объектов класса Category"""
     assert sample_category.name == "Тестовая категория товаров"
     assert sample_category.description == "Тестовое описание товаров"
@@ -48,7 +57,7 @@ def test_init_category(sample_category, sample_product_1, sample_product_2):
     assert sample_category.products[1] == sample_product_2
 
 
-def test_category_count():
+def test_category_count() -> None:
     """Тест на подсчет количества категорий"""
     Category.category_count = 0
     Category.product_count = 0
@@ -66,7 +75,7 @@ def test_category_count():
     assert category3.description == "Описание 3"
 
 
-def test_product_count(sample_product_1, sample_product_2, sample_product_3):
+def test_product_count(sample_product_1: Product, sample_product_2: Product, sample_product_3: Product) -> None:
     """Тест на подсчет количества товаров в категориях"""
     Category.category_count = 0
     Category.product_count = 0
