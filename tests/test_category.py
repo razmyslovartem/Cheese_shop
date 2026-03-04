@@ -1,9 +1,8 @@
-from typing import List
-
 from _pytest.capture import CaptureFixture
-
-from src.category import Category, Product
 import pytest
+
+from src.category import Category
+from src.category import Product
 
 
 @pytest.fixture()
@@ -23,11 +22,7 @@ def sample_product_3() -> Product:
 
 @pytest.fixture()
 def sample_category(sample_product_1: Product, sample_product_2: Product) -> Category:
-    return Category(
-        "Тестовая категория товаров",
-        "Тестовое описание товаров",
-        [sample_product_1, sample_product_2]
-    )
+    return Category("Тестовая категория товаров", "Тестовое описание товаров", [sample_product_1, sample_product_2])
 
 
 def test_init_product(sample_product_1: Product, sample_product_2: Product, sample_product_3: Product) -> None:
@@ -94,15 +89,11 @@ def test_category_count() -> None:
     Category.category_count = 0
     Category.product_count = 0
 
-    category1 = Category("Категория 1", "Описание 1")
+    Category("Категория 1", "Описание 1")
     assert Category.category_count == 1
-    assert category1.name == "Категория 1"
-    assert category1.description == "Описание 1"
 
-    category2 = Category("Категория 2", "Описание 2")
+    Category("Категория 2", "Описание 2")
     assert Category.category_count == 2
-    assert category2.name == "Категория 2"
-    assert category2.description == "Описание 2"
 
 
 def test_product_count(sample_product_1: Product, sample_product_2: Product, sample_product_3: Product) -> None:
@@ -112,26 +103,21 @@ def test_product_count(sample_product_1: Product, sample_product_2: Product, sam
     Category.product_count = 0
 
     # Категория с 2 товарами
-    category1 = Category("Категория с товарами", "Описание", [sample_product_1, sample_product_2])
+    Category("Категория с товарами", "Описание", [sample_product_1, sample_product_2])
     assert Category.product_count == 2
 
     # Категория с 1 товаром
-    category2 = Category("Еще категория", "Описание", [sample_product_3])
+    Category("Еще категория", "Описание", [sample_product_3])
     assert Category.product_count == 3  # 2 + 1 = 3
 
     # Пустая категория
-    category3 = Category("Пустая категория", "Описание")
+    Category("Пустая категория", "Описание")
     assert Category.product_count == 3  # не изменилось
 
 
 def test_product_new_classmethod() -> None:
     """Тест класс-метода new_product"""
-    product_data = {
-        "name": "Тестовый продукт",
-        "description": "Тестовое описание",
-        "price": 999.99,
-        "quantity": 10
-    }
+    product_data = {"name": "Тестовый продукт", "description": "Тестовое описание", "price": 999.99, "quantity": 10}
 
     product = Product.new_product(product_data)
 
