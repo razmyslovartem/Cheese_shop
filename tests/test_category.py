@@ -169,3 +169,133 @@ def test_products_formatting_with_float_price() -> None:
 
     # Проверяем, что цена выводится как "99.99"
     assert "99.99 руб." in category.products
+
+
+# НОВЫЕ ТЕСТЫ ДЛЯ ЗАДАНИЯ 3
+
+def test_product_str_method(sample_product_1: Product) -> None:
+    """Тест магического метода __str__ класса Product"""
+    product_str = str(sample_product_1)
+    expected = "Iphone 17 Pro, 189000 руб. Остаток: 3 шт."
+    assert product_str == expected
+
+
+def test_product_str_method_with_integer_price() -> None:
+    """Тест __str__ с целочисленной ценой"""
+    product = Product("Тест", "Описание", 100.0, 5)
+    assert str(product) == "Тест, 100 руб. Остаток: 5 шт."
+
+
+def test_product_str_method_with_float_price() -> None:
+    """Тест __str__ с дробной ценой"""
+    product = Product("Тест", "Описание", 99.99, 5)
+    assert str(product) == "Тест, 99.99 руб. Остаток: 5 шт."
+
+
+def test_category_str_method(sample_category: Category) -> None:
+    """Тест магического метода __str__ класса Category"""
+    category_str = str(sample_category)
+    # Общее количество: 3 + 5 = 8
+    expected = "Тестовая категория товаров, количество продуктов 8 шт."
+    assert category_str == expected
+
+
+def test_category_str_method_empty() -> None:
+    """Тест __str__ для пустой категории"""
+    category = Category("Пустая категория", "Описание")
+    assert str(category) == "Пустая категория, количество продуктов 0 шт."
+
+
+def test_category_str_method_single_product(sample_product_1: Product) -> None:
+    """Тест __str__ для категории с одним продуктом"""
+    category = Category("Категория с одним товаром", "Описание", [sample_product_1])
+    assert str(category) == "Категория с одним товаром, количество продуктов 3 шт."
+
+
+def test_product_add_method(sample_product_1: Product, sample_product_2: Product) -> None:
+    """Тест магического метода __add__ класса Product"""
+    # 189000 * 3 + 150000 * 5 = 567000 + 750000 = 1317000
+    expected_sum = (189000.0 * 3) + (150000.0 * 5)
+    assert sample_product_1 + sample_product_2 == expected_sum
+
+
+def test_product_add_method_with_other_products(sample_product_2: Product, sample_product_3: Product) -> None:
+    """Тест __add__ с другими продуктами"""
+    # 150000 * 5 + 50000 * 10 = 750000 + 500000 = 1250000
+    expected_sum = (150000.0 * 5) + (50000.0 * 10)
+    assert sample_product_2 + sample_product_3 == expected_sum
+
+
+def test_product_add_method_with_same_product(sample_product_1: Product) -> None:
+    """Тест __add__ с тем же продуктом"""
+    # 189000 * 3 + 189000 * 3 = 567000 + 567000 = 1134000
+    expected_sum = (189000.0 * 3) * 2
+    assert sample_product_1 + sample_product_1 == expected_sum
+
+
+def test_product_add_method_type_error() -> None:
+    """Тест __add__ с неправильным типом данных"""
+    product = Product("Тест", "Описание", 100.0, 5)
+
+    with pytest.raises(TypeError, match="Можно складывать только объекты класса Product"):
+        product + 10  # type: ignore
+
+    with pytest.raises(TypeError, match="Можно складывать только объекты класса Product"):
+        product + "строка"  # type: ignore
+
+
+def test_products_property_uses_str_method(sample_category: Category, monkeypatch) -> None:
+    """Тест, что геттер products использует __str__ каждого продукта"""
+
+    # Мокаем __str__ для продуктов, чтобы проверить, что он вызывается
+    original_str = Product.__str__
+
+    call_count = 0
+
+    def mock_str(self):
+        nonlocal call_count
+        call_count += 1
+        return original_str(self)
+
+    monkeypatch.setattr(Product, "__str__", mock_str)
+
+    # Вызываем геттер products
+    _ = sample_category.products
+
+    # Должен был вызваться для каждого продукта (2 раза)
+    assert call_count == 2
+
+
+def test_str_methods_integration(sample_category: Category, capsys) -> None:
+    """Интеграционный тест для всех строковых методов"""
+
+    print(sample_category)
+    captured = capsys.readouterr()
+    assert "количество продуктов 8 шт." in captured.out
+
+    print(sample_category.products)
+    captured = capsys.readouterr()
+    assert "Iphone 17 Pro" in captured.out
+    assert "Samsung Galaxy S25" in captured.out
+
+    for product in getattr(sample_category, "_Category__products"):
+        print(product)
+        captured = capsys.readouterr()
+        assert "руб. Остаток:" in captured.out
+
+
+def test_add_methods_integration() -> None:
+    """Интеграционный тест для метода сложения"""
+    p1 = Product("A", "Desc", 100, 10)
+    p2 = Product("B", "Desc", 200, 5)
+    p3 = Product("C", "Desc", 50, 20)
+
+    # Проверяем разные комбинации сложения
+    assert p1 + p2 == (100 * 10) + (200 * 5)
+    assert p1 + p3 == (100 * 10) + (50 * 20)
+    assert p2 + p3 == (200 * 5) + (50 * 20)
+
+    # Проверяем, что результат можно использовать в вычислениях
+    total = (p1 + p2) + (p1 + p3)
+    expected = (100 * 10 + 200 * 5) + (100 * 10 + 50 * 20)
+    assert total == expected

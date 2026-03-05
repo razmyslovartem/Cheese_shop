@@ -12,12 +12,12 @@ class Product:
         self.__price = price
         self.quantity = quantity
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Строковое представление продукта"""
-        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+        price_str = str(int(self.__price)) if self.__price.is_integer() else str(self.__price)
+        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
-
-    def __add__(self, other):
+    def __add__(self, other: "Product") -> float:
         """
         Сложение двух продуктов для получения общей стоимости на складе.
         Возвращает сумму произведений цены на количество для двух продуктов.
@@ -63,8 +63,7 @@ class Category:
         Category.category_count += 1
         Category.product_count += len(self.__products)
 
-
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Строковое представление категории.
         Считает общее количество товаров на складе (сумму quantity всех продуктов).
