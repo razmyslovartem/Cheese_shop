@@ -12,6 +12,20 @@ class Product:
         self.__price = price
         self.quantity = quantity
 
+    def __str__(self):
+        """Строковое представление продукта"""
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+
+
+    def __add__(self, other):
+        """
+        Сложение двух продуктов для получения общей стоимости на складе.
+        Возвращает сумму произведений цены на количество для двух продуктов.
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты класса Product")
+        return (self.__price * self.quantity) + (other.__price * other.quantity)
+
     @property
     def price(self) -> float:
         """Геттер для получения цены"""
@@ -49,25 +63,26 @@ class Category:
         Category.category_count += 1
         Category.product_count += len(self.__products)
 
+
+    def __str__(self):
+        """
+        Строковое представление категории.
+        Считает общее количество товаров на складе (сумму quantity всех продуктов).
+        """
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов {total_quantity} шт."
+
     @property
     def products(self) -> str:
         """
         Геттер для получения списка товаров в отформатированном виде.
-        Возвращает строку с информацией о каждом товаре в формате:
-        "Название продукта, 80 руб. Остаток: 15 шт."
+        Теперь использует __str__ каждого продукта.
         """
         if not self.__products:
             return "В категории нет товаров"
 
-        result = []
-        for product in self.__products:
-            price = product.price
-            # Для красивого вывода убираем .0 если это целое число
-            price_str = str(int(price)) if price.is_integer() else str(price)
-            product_str = f"{product.name}, {price_str} руб. Остаток: {product.quantity} шт."
-            result.append(product_str)
-
-        return "\n".join(result)
+        # Используем __str__ каждого продукта
+        return "\n".join(str(product) for product in self.__products)
 
     def add_product(self, new_product: Product) -> None:
         self.__products.append(new_product)
