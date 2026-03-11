@@ -1,8 +1,12 @@
 from _pytest.capture import CaptureFixture
+from abc import ABC
 import pytest
 
 from src.category import Category
 from src.category import Product
+from src.category import Smartphone
+from src.category import LawnGrass
+from src.category import BaseProduct
 
 
 @pytest.fixture()
@@ -18,6 +22,33 @@ def sample_product_2() -> Product:
 @pytest.fixture()
 def sample_product_3() -> Product:
     return Product("Xiaomi Mi 14", "256GB, Green", 50000.0, 10)
+
+
+@pytest.fixture()
+def sample_smartphone() -> Smartphone:
+    return Smartphone(
+        name="iPhone 15",
+        description="Флагманский смартфон",
+        price=120000.0,
+        quantity=10,
+        efficiency=8.5,
+        model="15 Pro",
+        memory=512,
+        color="Gray"
+    )
+
+
+@pytest.fixture()
+def sample_lawn_grass() -> LawnGrass:
+    return LawnGrass(
+        name="Газон спортивный",
+        description="Быстрорастущий газон",
+        price=2500.0,
+        quantity=20,
+        country="Россия",
+        germination_period="7-10 дней",
+        color="Зеленый"
+    )
 
 
 @pytest.fixture()
@@ -141,7 +172,12 @@ def test_product_price_property() -> None:
 
 def test_product_price_setter_with_negative(capsys: CaptureFixture) -> None:
     """Тест вывода сообщения при установке отрицательной цены"""
+    # Очищаем вывод от сообщения о создании объекта
+    capsys.readouterr()
+
     product = Product("Тест", "Описание", 100.0, 5)
+    # Очищаем вывод после создания продукта
+    capsys.readouterr()
 
     product.price = -50.0
     captured = capsys.readouterr()
@@ -246,7 +282,6 @@ def test_product_add_method_type_error() -> None:
 
 def test_products_property_uses_str_method(sample_category: Category, monkeypatch) -> None:
     """Тест, что геттер products использует __str__ каждого продукта"""
-
     # Мокаем __str__ для продуктов, чтобы проверить, что он вызывается
     original_str = Product.__str__
 
@@ -268,6 +303,8 @@ def test_products_property_uses_str_method(sample_category: Category, monkeypatc
 
 def test_str_methods_integration(sample_category: Category, capsys) -> None:
     """Интеграционный тест для всех строковых методов"""
+    # Очищаем вывод от сообщений о создании объектов
+    capsys.readouterr()
 
     print(sample_category)
     captured = capsys.readouterr()
@@ -299,3 +336,55 @@ def test_add_methods_integration() -> None:
     total = (p1 + p2) + (p1 + p3)
     expected = (100 * 10 + 200 * 5) + (100 * 10 + 50 * 20)
     assert total == expected
+
+
+# НОВЫЕ ТЕСТЫ ДЛЯ ПРОВЕРКИ НОВОЙ ФУНКЦИОНАЛЬНОСТИ (5 штук)
+
+def test_base_product_abstract() -> None:
+    """Тест, что BaseProduct является абстрактным классом"""
+    assert issubclass(BaseProduct, ABC)
+    with pytest.raises(TypeError):
+        BaseProduct()  # type: ignore
+
+
+def test_smartphone_creation(sample_smartphone: Smartphone) -> None:
+    """Тест создания смартфона"""
+    assert sample_smartphone.name == "iPhone 15"
+    assert sample_smartphone.description == "Флагманский смартфон"
+    assert sample_smartphone.price == 120000.0
+    assert sample_smartphone.quantity == 10
+    assert sample_smartphone.efficiency == 8.5
+    assert sample_smartphone.model == "15 Pro"
+    assert sample_smartphone.memory == 512
+    assert sample_smartphone.color == "Gray"
+
+
+def test_lawn_grass_creation(sample_lawn_grass: LawnGrass) -> None:
+    """Тест создания газонной травы"""
+    assert sample_lawn_grass.name == "Газон спортивный"
+    assert sample_lawn_grass.description == "Быстрорастущий газон"
+    assert sample_lawn_grass.price == 2500.0
+    assert sample_lawn_grass.quantity == 20
+    assert sample_lawn_grass.country == "Россия"
+    assert sample_lawn_grass.germination_period == "7-10 дней"
+    assert sample_lawn_grass.color == "Зеленый"
+
+
+def test_different_classes_cannot_add(sample_smartphone: Smartphone, sample_lawn_grass: LawnGrass) -> None:
+    """Тест запрета сложения разных классов"""
+    with pytest.raises(TypeError, match="Нельзя складывать товары разных классов"):
+        sample_smartphone + sample_lawn_grass
+
+
+def test_repr_mixin_output(capsys) -> None:
+    """Тест, что миксин выводит сообщение при создании объекта"""
+    # Очищаем предыдущий вывод
+    capsys.readouterr()
+
+    Product("Тест", "Описание", 100.0, 5)
+    captured = capsys.readouterr()
+
+    assert "Создан объект: Product(" in captured.out
+    assert "name='Тест'" in captured.out
+    assert "description='Описание'" in captured.out
+    assert "quantity=5" in captured.out
