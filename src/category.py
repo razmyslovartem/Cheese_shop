@@ -8,7 +8,7 @@ from typing import Optional
 class ReprMixin:
     """Миксин для логирования создания объектов"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         """Конструктор миксина, который выводит информацию о создаваемом объекте"""
         # Вызываем __init__ следующего класса в MRO
         super().__init__(*args, **kwargs)
@@ -21,7 +21,7 @@ class ReprMixin:
         attributes = []
         for key, value in self.__dict__.items():
             # Пропускаем приватные атрибуты (начинающиеся с _)
-            if not key.startswith('_'):
+            if not key.startswith("_"):
                 attributes.append(f"{key}={value!r}")
 
         # Формируем строку вида: ClassName(attr1=value1, attr2=value2, ...)
@@ -34,18 +34,15 @@ class BaseProduct(ABC):
         """Абстрактный метод инициализации"""
         pass
 
-
     @abstractmethod
     def __str__(self) -> str:
         """Абстрактный метод для строкового представления"""
         pass
 
-
     @abstractmethod
     def __add__(self, other: "BaseProduct") -> float:
         """Абстрактный метод для сложения продуктов"""
         pass
-
 
     @property
     @abstractmethod
@@ -53,12 +50,12 @@ class BaseProduct(ABC):
         """Абстрактный геттер для цены"""
         pass
 
-
     @price.setter
     @abstractmethod
     def price(self, value: float) -> None:
         """Абстрактный сеттер для цены"""
         pass
+
 
 class Product(ReprMixin, BaseProduct):
     """Класс для товаров"""
@@ -76,7 +73,7 @@ class Product(ReprMixin, BaseProduct):
         price_str = str(int(self.__price)) if self.__price.is_integer() else str(self.__price)
         return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other: "Product") -> float:
+    def __add__(self, other: BaseProduct) -> float:
         """
         Сложение двух продуктов для получения общей стоимости на складе.
         Можно складывать только объекты одного класса (проверка через type()).
@@ -132,10 +129,12 @@ class Smartphone(Product):
 
     def __repr__(self) -> str:
         """Переопределяем __repr__ для Smartphone с учётом всех атрибутов"""
-        return (f"Smartphone(name={self.name!r}, description={self.description!r}, "
-                f"price={self.price!r}, quantity={self.quantity!r}, "
-                f"efficiency={self.efficiency!r}, model={self.model!r}, "
-                f"memory={self.memory!r}, color={self.color!r})")
+        return (
+            f"Smartphone(name={self.name!r}, description={self.description!r}, "
+            f"price={self.price!r}, quantity={self.quantity!r}, "
+            f"efficiency={self.efficiency!r}, model={self.model!r}, "
+            f"memory={self.memory!r}, color={self.color!r})"
+        )
 
 
 class LawnGrass(Product):
@@ -156,10 +155,13 @@ class LawnGrass(Product):
 
     def __repr__(self) -> str:
         """Переопределяем __repr__ для LawnGrass с учётом всех атрибутов"""
-        return (f"LawnGrass(name={self.name!r}, description={self.description!r}, "
-                f"price={self.price!r}, quantity={self.quantity!r}, "
-                f"country={self.country!r}, germination_period={self.germination_period!r}, "
-                f"color={self.color!r})")
+        return (
+            f"LawnGrass(name={self.name!r}, description={self.description!r}, "
+            f"price={self.price!r}, quantity={self.quantity!r}, "
+            f"country={self.country!r}, germination_period={self.germination_period!r}, "
+            f"color={self.color!r})"
+        )
+
 
 class Category:
     """Класс для категорий товаров"""
