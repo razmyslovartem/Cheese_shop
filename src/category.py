@@ -20,10 +20,14 @@ class Product:
     def __add__(self, other: "Product") -> float:
         """
         Сложение двух продуктов для получения общей стоимости на складе.
-        Возвращает сумму произведений цены на количество для двух продуктов.
+        Можно складывать только объекты одного класса (проверка через type()).
         """
         if not isinstance(other, Product):
             raise TypeError("Можно складывать только объекты класса Product")
+
+        if type(self) is not type(other):
+            raise TypeError("Нельзя складывать товары разных классов")
+
         return (self.__price * self.quantity) + (other.__price * other.quantity)
 
     @property
@@ -47,6 +51,42 @@ class Product:
             price=product_data["price"],
             quantity=product_data["quantity"],
         )
+
+
+class Smartphone(Product):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: float,
+        model: str,
+        memory: int,
+        color: str,
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+class LawnGrass(Product):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: str,
+        color: str,
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
 
 
 class Category:
@@ -84,6 +124,13 @@ class Category:
         return "\n".join(str(product) for product in self.__products)
 
     def add_product(self, new_product: Product) -> None:
+        """
+        Добавляет продукт в категорию.
+        Принимает только объекты класса Product или его наследников.
+        """
+        if not isinstance(new_product, Product):
+            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+
         self.__products.append(new_product)
 
         Category.product_count += 1
