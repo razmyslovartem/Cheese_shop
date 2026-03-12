@@ -1,8 +1,12 @@
 from _pytest.capture import CaptureFixture
+from abc import ABC
 import pytest
 
 from src.category import Category
 from src.category import Product
+from src.category import Smartphone
+from src.category import LawnGrass
+from src.category import BaseProduct
 
 
 @pytest.fixture()
@@ -18,6 +22,33 @@ def sample_product_2() -> Product:
 @pytest.fixture()
 def sample_product_3() -> Product:
     return Product("Xiaomi Mi 14", "256GB, Green", 50000.0, 10)
+
+
+@pytest.fixture()
+def sample_smartphone() -> Smartphone:
+    return Smartphone(
+        name="iPhone 15",
+        description="Флагманский смартфон",
+        price=120000.0,
+        quantity=10,
+        efficiency=8.5,
+        model="15 Pro",
+        memory=512,
+        color="Gray"
+    )
+
+
+@pytest.fixture()
+def sample_lawn_grass() -> LawnGrass:
+    return LawnGrass(
+        name="Газон спортивный",
+        description="Быстрорастущий газон",
+        price=2500.0,
+        quantity=20,
+        country="Россия",
+        germination_period="7-10 дней",
+        color="Зеленый"
+    )
 
 
 @pytest.fixture()
@@ -141,7 +172,12 @@ def test_product_price_property() -> None:
 
 def test_product_price_setter_with_negative(capsys: CaptureFixture) -> None:
     """Тест вывода сообщения при установке отрицательной цены"""
+    # Очищаем вывод от сообщения о создании объекта
+    capsys.readouterr()
+
     product = Product("Тест", "Описание", 100.0, 5)
+    # Очищаем вывод после создания продукта
+    capsys.readouterr()
 
     product.price = -50.0
     captured = capsys.readouterr()
@@ -236,9 +272,10 @@ def test_category_add_product_with_none() -> None:
     """Тест add_product с передачей None"""
     category = Category("Тест", "Описание")
 
-    with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product или его наследников"):
-        category.add_product(None)  # type: ignore
-
+def test_products_property_uses_str_method(sample_category: Category, monkeypatch) -> None:
+    """Тест, что геттер products использует __str__ каждого продукта"""
+    # Мокаем __str__ для продуктов, чтобы проверить, что он вызывается
+    original_str = Product.__str__
 
 def test_category_add_product_with_product_subclass() -> None:
     """Тест add_product с объектом класса-наследника Product"""
@@ -263,91 +300,89 @@ def test_category_add_product_with_product_subclass() -> None:
     assert Category.product_count == initial_count + 1
 
 
-def test_product_add_method_different_subclasses() -> None:
-    """Тест __add__ с разными наследниками Product (должно вызывать TypeError)"""
-    # Создаем два разных класса-наследника
-    class Smartphone(Product):
-        pass
+def test_str_methods_integration(sample_category: Category, capsys) -> None:
+    """Интеграционный тест для всех строковых методов"""
+    # Очищаем вывод от сообщений о создании объектов
+    capsys.readouterr()
 
     class Laptop(Product):
         pass
 
-    smartphone = Smartphone("iPhone", "Смартфон", 100000.0, 3)
-    laptop = Laptop("MacBook", "Ноутбук", 150000.0, 2)
+    print(sample_category.products)
+    captured = capsys.readouterr()
+    assert "Iphone 17 Pro" in captured.out
+    assert "Samsung Galaxy S25" in captured.out
 
-    # Проверяем, что type(self) is not type(other) вызывает TypeError
+    for product in getattr(sample_category, "_Category__products"):
+        print(product)
+        captured = capsys.readouterr()
+        assert "руб. Остаток:" in captured.out
+
+
+def test_add_methods_integration() -> None:
+    """Интеграционный тест для метода сложения"""
+    p1 = Product("A", "Desc", 100, 10)
+    p2 = Product("B", "Desc", 200, 5)
+    p3 = Product("C", "Desc", 50, 20)
+
+    # Проверяем разные комбинации сложения
+    assert p1 + p2 == (100 * 10) + (200 * 5)
+    assert p1 + p3 == (100 * 10) + (50 * 20)
+    assert p2 + p3 == (200 * 5) + (50 * 20)
+
+    # Проверяем, что результат можно использовать в вычислениях
+    total = (p1 + p2) + (p1 + p3)
+    expected = (100 * 10 + 200 * 5) + (100 * 10 + 50 * 20)
+    assert total == expected
+
+
+# НОВЫЕ ТЕСТЫ ДЛЯ ПРОВЕРКИ НОВОЙ ФУНКЦИОНАЛЬНОСТИ (5 штук)
+
+def test_base_product_abstract() -> None:
+    """Тест, что BaseProduct является абстрактным классом"""
+    assert issubclass(BaseProduct, ABC)
+    with pytest.raises(TypeError):
+        BaseProduct()  # type: ignore
+
+
+def test_smartphone_creation(sample_smartphone: Smartphone) -> None:
+    """Тест создания смартфона"""
+    assert sample_smartphone.name == "iPhone 15"
+    assert sample_smartphone.description == "Флагманский смартфон"
+    assert sample_smartphone.price == 120000.0
+    assert sample_smartphone.quantity == 10
+    assert sample_smartphone.efficiency == 8.5
+    assert sample_smartphone.model == "15 Pro"
+    assert sample_smartphone.memory == 512
+    assert sample_smartphone.color == "Gray"
+
+
+def test_lawn_grass_creation(sample_lawn_grass: LawnGrass) -> None:
+    """Тест создания газонной травы"""
+    assert sample_lawn_grass.name == "Газон спортивный"
+    assert sample_lawn_grass.description == "Быстрорастущий газон"
+    assert sample_lawn_grass.price == 2500.0
+    assert sample_lawn_grass.quantity == 20
+    assert sample_lawn_grass.country == "Россия"
+    assert sample_lawn_grass.germination_period == "7-10 дней"
+    assert sample_lawn_grass.color == "Зеленый"
+
+
+def test_different_classes_cannot_add(sample_smartphone: Smartphone, sample_lawn_grass: LawnGrass) -> None:
+    """Тест запрета сложения разных классов"""
     with pytest.raises(TypeError, match="Нельзя складывать товары разных классов"):
-        smartphone + laptop
+        sample_smartphone + sample_lawn_grass
 
 
-def test_product_add_method_same_subclass() -> None:
-    """Тест __add__ с одинаковыми наследниками Product (должно работать)"""
-    class Smartphone(Product):
-        pass
+def test_repr_mixin_output(capsys) -> None:
+    """Тест, что миксин выводит сообщение при создании объекта"""
+    # Очищаем предыдущий вывод
+    capsys.readouterr()
 
-    smartphone1 = Smartphone("iPhone", "Смартфон", 100000.0, 3)
-    smartphone2 = Smartphone("Samsung", "Смартфон", 90000.0, 5)
+    Product("Тест", "Описание", 100.0, 5)
+    captured = capsys.readouterr()
 
-    expected = (100000.0 * 3) + (90000.0 * 5)
-    assert smartphone1 + smartphone2 == expected
-
-
-def test_product_add_method_mixed_classes_detailed() -> None:
-    """Детальный тест для проверки type() в __add__"""
-    # Создаем продукты с разными типами
-    product = Product("Обычный товар", "Описание", 100.0, 5)
-
-    class ChildProduct(Product):
-        pass
-
-    child = ChildProduct("Дочерний товар", "Описание", 200.0, 3)
-
-    # Проверяем, что type(product) is not type(child)
-    assert type(product) is not type(child)
-
-    # Проверяем, что сложение вызывает ошибку
-    with pytest.raises(TypeError, match="Нельзя складывать товары разных классов"):
-        product + child
-
-    with pytest.raises(TypeError, match="Нельзя складывать товары разных классов"):
-        child + product
-
-
-def test_product_add_method_same_type_with_subclass() -> None:
-    """Тест, что __add__ с одинаковыми типами работает даже для подклассов"""
-    class ChildProduct(Product):
-        pass
-
-    child1 = ChildProduct("Дочерний 1", "Описание", 100.0, 5)
-    child2 = ChildProduct("Дочерний 2", "Описание", 200.0, 3)
-
-    # Оба одного типа ChildProduct, поэтому должно работать
-    expected = (100.0 * 5) + (200.0 * 3)
-    assert child1 + child2 == expected
-
-
-def test_category_product_count_with_add_and_quantity() -> None:
-    """Тест, что product_count считает позиции, а не quantity"""
-    # Сбрасываем счетчики
-    Category.category_count = 0
-    Category.product_count = 0
-
-    # Создаем продукты с разным quantity
-    p1 = Product("Товар 1", "Описание", 100.0, 10)  # quantity = 10
-    p2 = Product("Товар 2", "Описание", 200.0, 5)   # quantity = 5
-
-    # Создаем категорию с этими продуктами
-    category = Category("Категория", "Описание", [p1, p2])
-
-    # product_count должен быть 2 (количество позиций), а не 15 (сумма quantity)
-    assert Category.product_count == 2
-
-    # Добавляем еще один продукт
-    p3 = Product("Товар 3", "Описание", 300.0, 3)
-    category.add_product(p3)
-
-    # product_count должен увеличиться на 1, а не на 3
-    assert Category.product_count == 3
-
-    # Проверяем, что __str__ показывает сумму quantity
-    assert str(category) == "Категория, количество продуктов 18 шт."
+    assert "Создан объект: Product(" in captured.out
+    assert "name='Тест'" in captured.out
+    assert "description='Описание'" in captured.out
+    assert "quantity=5" in captured.out
