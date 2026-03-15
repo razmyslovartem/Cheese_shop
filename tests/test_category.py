@@ -388,3 +388,60 @@ def test_repr_mixin_output(capsys) -> None:
     assert "name='Тест'" in captured.out
     assert "description='Описание'" in captured.out
     assert "quantity=5" in captured.out
+
+
+def test_product_invalid_quantity():
+    """
+    Тест проверяет, что при создании продукта с нулевым количеством
+    выбрасывается исключение ValueError с правильным сообщением
+    """
+    with pytest.raises(ValueError) as exc_info:
+        Product("Бракованный товар", "Неверное количество", 1000.0, 0)
+
+    assert str(exc_info.value) == "Товар с нулевым количеством не может быть добавлен"
+
+
+def test_product_valid_quantity():
+    """
+    Тест проверяет, что продукт с положительным количеством создается успешно
+    """
+    product = Product("Телефон", "Смартфон", 50000.0, 5)
+    assert product.name == "Телефон"
+    assert product.description == "Смартфон"
+    assert product.price == 50000.0
+    assert product.quantity == 5
+
+
+def test_category_middle_price_with_products():
+    """
+    Тест проверяет расчет среднего ценника в категории с товарами
+    """
+    # Создаем товары
+    product1 = Product("Товар 1", "Описание 1", 100.0, 10)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 5)
+    product3 = Product("Товар 3", "Описание 3", 300.0, 8)
+
+    # Создаем категорию с товарами
+    category = Category("Тестовая категория", "Описание категории",
+                        [product1, product2, product3])
+
+    # Ожидаемый средний ценник: (100 + 200 + 300) / 3 = 200
+    assert category.middle_price() == 200.0
+
+
+def test_category_middle_price_empty_category():
+    """
+    Тест проверяет, что для пустой категории метод middle_price возвращает 0
+    """
+    category_empty = Category("Пустая категория", "Нет товаров", [])
+    assert category_empty.middle_price() == 0.0
+
+
+def test_category_middle_price_with_one_product():
+    """
+    Тест проверяет расчет среднего ценника в категории с одним товаром
+    """
+    product = Product("Один товар", "Описание", 150.0, 3)
+    category = Category("Категория с одним товаром", "Описание", [product])
+
+    assert category.middle_price() == 150.0
